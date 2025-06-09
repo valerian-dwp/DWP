@@ -1,0 +1,398 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracking Barang - Ekspedisi Gratis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="bg-white p-6 rounded-2xl shadow-md w-full max-w-md">
+      <h1 class="text-2xl font-bold mb-4 text-center">Tracking Barang</h1>
+      <p class="text-sm text-center mb-6 text-gray-500">Masukkan nomor resi untuk melacak pengiriman Anda</p>
+      <input
+        id="resiInput"
+        type="text"
+        placeholder="Contoh: 2043"
+        class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <button
+        onclick="cekResi()"
+        class="w-full bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 transition"
+      >
+        Cek Resi
+      </button>
+      <div id="hasilTracking" class="mt-6 hidden">
+        <h2 class="text-lg font-semibold mb-2">Status Pengiriman:</h2>
+        <ul id="trackingList" class="text-sm text-gray-700 space-y-1"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dummyData = {
+  "2043": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2041": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2042": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2040": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2038": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2028": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2033": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2032": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2031": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2030": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2029": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2026": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2027": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2037": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2036": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2035": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2034": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2024": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2023": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2022": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2020": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2044": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2046": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2047": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2045": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2048": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2054": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2052": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2053": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2049": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2050": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2051": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "2021": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ],
+  "1859": [
+    {
+      "tanggal": "2025-06-04",
+      "status": "berangkat dari jakarta menuju denpasar"
+    },
+    {
+      "tanggal": "2025-06-09",
+      "status": "tiba di gudang denpasar"
+    }
+  ]
+};
+
+    function cekResi() {
+      const input = document.getElementById("resiInput").value.trim();
+      const hasilTracking = document.getElementById("hasilTracking");
+      const trackingList = document.getElementById("trackingList");
+
+      trackingList.innerHTML = "";
+      if (dummyData[input]) {
+        dummyData[input].forEach(entry => {
+          const li = document.createElement("li");
+          li.textContent = `${entry.tanggal}: ${entry.status}`;
+          trackingList.appendChild(li);
+        });
+        hasilTracking.classList.remove("hidden");
+      } else {
+        trackingList.innerHTML = "<li class='text-red-600'>Nomor resi tidak ditemukan.</li>";
+        hasilTracking.classList.remove("hidden");
+      }
+    }
+  </script>
+</body>
+</html>
