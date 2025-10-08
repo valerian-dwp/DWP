@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tracking Barang - Google Sheets</title>
+  <title>Tracking Barang - Dewata Wijaya Perkasa</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -11,10 +11,12 @@
     <div class="bg-white p-6 rounded-2xl shadow-md w-full max-w-md">
       <h1 class="text-2xl font-bold mb-4 text-center">Tracking Barang</h1>
       <p class="text-sm text-center mb-6 text-gray-500">Masukkan nomor resi untuk melacak pengiriman Anda</p>
+
+      <!-- Input -->
       <input
         id="resiInput"
         type="text"
-        placeholder="Contoh: 1234"
+        placeholder="Contoh: 4098"
         class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button
@@ -23,9 +25,20 @@
       >
         Cek Resi
       </button>
-      <div id="hasilTracking" class="mt-6 hidden">
-        <h2 class="text-lg font-semibold mb-2">Status Pengiriman:</h2>
-        <ul id="trackingList" class="text-sm text-gray-700 space-y-1"></ul>
+
+      <!-- Loading -->
+      <div id="loading" class="hidden mt-4 text-center text-blue-600 font-medium">Memuat data...</div>
+
+      <!-- Hasil -->
+      <div id="hasilTracking" class="mt-6 hidden transition-all duration-500">
+        <h2 class="text-lg font-semibold mb-3">Status Pengiriman:</h2>
+        <div id="trackingList" class="relative border-l-2 border-blue-500 pl-4 space-y-4"></div>
+        <button
+          onclick="resetForm()"
+          class="w-full mt-6 bg-gray-200 text-gray-700 rounded-lg py-2 hover:bg-gray-300 transition"
+        >
+          Cari Resi Lain
+        </button>
       </div>
     </div>
   </div>
@@ -35,20 +48,35 @@
     let dummyData = {};
 
     async function loadData() {
+      const loading = document.getElementById("loading");
+      loading.classList.remove("hidden");
       try {
         const res = await fetch(sheetURL);
         const data = await res.json();
+
         data.forEach(row => {
           const resi = row.resi;
           if (!dummyData[resi]) dummyData[resi] = [];
-          dummyData[resi].push({
-            tanggal: row.tanggal,
-            status: row.status
-          });
+
+          // Baca semua kolom tanggal & status (tanggal, tanggal2, tanggal3, dst)
+          for (let i = 1; i <= 10; i++) { // maksimal 10 update (bisa disesuaikan)
+            const tanggalKey = i === 1 ? "tanggal" : `tanggal${i}`;
+            const statusKey = i === 1 ? "status" : `status${i}`;
+
+            if (row[tanggalKey] && row[statusKey]) {
+              dummyData[resi].push({
+                tanggal: row[tanggalKey],
+                status: row[statusKey]
+              });
+            }
+          }
         });
+
         console.log("Data berhasil dimuat");
       } catch (error) {
         console.error("Gagal memuat data:", error);
+      } finally {
+        loading.classList.add("hidden");
       }
     }
 
@@ -58,26 +86,45 @@
       const trackingList = document.getElementById("trackingList");
 
       trackingList.innerHTML = "";
+      hasilTracking.classList.add("hidden");
+
       if (!Object.keys(dummyData).length) {
         await loadData();
       }
 
       if (dummyData[input]) {
-        dummyData[input]
-          .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)) // Urutkan berdasarkan tanggal ASC
-          .forEach(entry => {
-            const li = document.createElement("li");
-            li.textContent = `${entry.tanggal}: ${entry.status}`;
-            trackingList.appendChild(li);
-          });
+        const entries = dummyData[input].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+        entries.forEach((entry, index) => {
+          const item = document.createElement("div");
+          item.className = "relative pl-4";
+          item.innerHTML = `
+            <div class="absolute -left-3 w-5 h-5 rounded-full border-2 ${
+              index === entries.length - 1 ? "bg-green-500 border-green-500" : "bg-blue-500 border-blue-500"
+            }"></div>
+            <p class="font-medium">${entry.tanggal}</p>
+            <p class="text-gray-700">${entry.status}</p>
+          `;
+          trackingList.appendChild(item);
+        });
+
         hasilTracking.classList.remove("hidden");
       } else {
-        trackingList.innerHTML = "<li class='text-red-600'>Nomor resi tidak ditemukan.</li>";
+        trackingList.innerHTML = "<p class='text-red-600'>Nomor resi tidak ditemukan.</p>";
         hasilTracking.classList.remove("hidden");
       }
     }
 
-    // Auto-load on start
+    function resetForm() {
+      document.getElementById("resiInput").value = "";
+      document.getElementById("hasilTracking").classList.add("hidden");
+      document.getElementById("trackingList").innerHTML = "";
+    }
+
+    document.getElementById("resiInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") cekResi();
+    });
+
     loadData();
   </script>
 </body>
